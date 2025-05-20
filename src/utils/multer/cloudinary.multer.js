@@ -1,6 +1,5 @@
 import path from "node:path";
 import * as dotenv from "dotenv";
-// dotenv.config({ path: path.join("../../config/.env.DEV") });
 dotenv.config();
 import cloudinary from "cloudinary";
 

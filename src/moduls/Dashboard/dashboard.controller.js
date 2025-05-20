@@ -5,21 +5,21 @@ import { banUser, unbanUser } from "./mutations/userMutations.js";
 import { approveCompany } from "./mutations/companyMutations.js";
 
 const schema = new GraphQLSchema({
-  query:new GraphQLObjectType({
-    name : "RootQuery",
-    description:"main applicaion query",
-    fields:{
+  query: new GraphQLObjectType({
+    name: "RootQuery",
+    description: "main applicaion query",
+    fields: {
       getAllUsers,
-      getAllCompanies, 
-    }
+      getAllCompanies,
+    },
   }),
-  mutation:new GraphQLObjectType({
+  mutation: new GraphQLObjectType({
     name: "Mutation",
     fields: {
       banUser,
       unbanUser,
       approveCompany,
-    }
-  })
-})
-export default schema
+    },
+  }),
+});
+export default schema;

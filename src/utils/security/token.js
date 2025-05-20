@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import * as dbService from "../../DB/db.service.js";
-import { asyncHandler } from "../error/error.js";
 import userModel from "../../DB/models/User.Collection.js";
 
 export const generateToken = ({
-  payload = {},  // 🔹 خلي الافتراضي Object فارغ بدل من String
+  payload = {}, 
   signature = process.env.USER_ACCESS_TOKEN,
   expiresIn = "30min",
 } = {}) => {
@@ -15,14 +14,13 @@ export const generateToken = ({
   return token;
 };
 
-
 export const verifyToken2 = (token) => {
   try {
     if (!token) {
       throw new Error("Token is missing");
     }
 
-    const cleanToken = token.replace("Bearer ", "").trim(); // إزالة "Bearer " إذا كانت موجودة
+    const cleanToken = token.replace("Bearer ", "").trim(); 
     const decoded = jwt.verify(cleanToken, process.env.USER_ACCESS_TOKEN);
 
     return decoded;
@@ -31,7 +29,6 @@ export const verifyToken2 = (token) => {
     return null;
   }
 };
-
 
 export const verifyToken = ({
   token = "",
@@ -86,14 +83,15 @@ export const decodedToken = async ({
   }
   const decoded = verifyToken({
     token,
-    signature: tokenType == tokenTypes.access ? accessSignature : refreshSignature,
+    signature:
+      tokenType == tokenTypes.access ? accessSignature : refreshSignature,
   });
 
   if (!decoded.id)
     return next(new Error("Invalid token payload", { cause: 400 }));
   const user = await dbService.findOne({
     model: userModel,
-    filter: { _id: decoded.id  },
+    filter: { _id: decoded.id },
   });
   if (!user) return next(new Error("User not found", { cause: 404 }));
 

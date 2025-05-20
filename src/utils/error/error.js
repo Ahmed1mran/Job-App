@@ -8,7 +8,6 @@ export const asyncHandler = (fn) => {
   };
 };
 
-
 export const globalErrorHandling = (error, req, res, next) => {
   console.log("💥 ERROR LOGGED:", error); // 🛠️ يساعد في التحقق من الخطأ
 

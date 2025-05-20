@@ -1,5 +1,5 @@
 import cors from "cors";
-import { graphqlHTTP } from "express-graphql"; // ✅ تأكد من الاستدعاء الصحيح
+import { graphqlHTTP } from "express-graphql";
 import path from "node:path";
 import connectDB from "./DB/connection.js";
 import { globalErrorHandling } from "./utils/error/error.js";
@@ -11,10 +11,9 @@ import chatController from "../src/moduls/chat/chat.controller.js";
 import endPointController from "../src/moduls/endPoint/endPoint.controller.js";
 import companyController from "../src/moduls/company/company.controller.js";
 import schema from "../src/moduls/Dashboard/dashboard.controller.js";
-import { createHandler } from "graphql-http/lib/use/express";
 import playground from "graphql-playground-middleware-express";
-import { verifyToken, verifyToken2 } from "./utils/security/token.js";
-import { rateLimit } from 'express-rate-limit'
+import { verifyToken2 } from "./utils/security/token.js";
+import { rateLimit } from "express-rate-limit";
 
 const bootstrap = (app, express) => {
   const limiter = rateLimit({
@@ -33,8 +32,6 @@ const bootstrap = (app, express) => {
   app.use(cors());
   app.use(limiter);
 
-  // app.use("/auth", limiter);
-
   app.use(express.json());
   app.use("/uploads", express.static(path.resolve("./src/uploads")));
 
@@ -49,14 +46,13 @@ const bootstrap = (app, express) => {
   app.use("/company", companyController);
   app.use("/auth", authController);
   app.use("/user", userController);
-  app.get('/playground', playground.default({ endpoint: '/graphql' }));
+  app.get("/playground", playground.default({ endpoint: "/graphql" }));
 
   app.use(
     "/graphql",
     graphqlHTTP(async (req) => {
       const token = req.headers.authorization || "";
-      const user = verifyToken2(token); // لازم تكون عندك دالة تفك تشفير التوكن
-      console.log("User in Context:", user); // 🔹 تحقق إنه بيوصل للـ context
+      const user = verifyToken2(token);
 
       return {
         schema,

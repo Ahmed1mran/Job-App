@@ -1,16 +1,12 @@
 import * as dbservice from "../../DB/db.service.js";
 import companyModel from "../../DB/models/Company.Collection.js";
 import { asyncHandler } from "../../utils/error/error.js";
-import { emailEvent } from "../../utils/events/email.event.js";
 import { cloud } from "../../utils/response/multer/cloudinary.multer.js";
 import { paginate } from "../../utils/paginate.js";
 import { successResponse } from "../../utils/response/success.response.js";
-import userModel from "../../DB/models/User.Collection.js";
 import jobModel from "../../DB/models/Job.opportunity.Collection.js";
-import {status} from "../../DB/models/Application.Collection.js";
 import mongoose from "mongoose";
 import applicationModel from "../../DB/models/Application.Collection.js";
-import { io } from "../../utils/socket/socket.js"; // استدعاء socket.io
 import { sendEmail } from "../../utils/email/send.email.js";
 import { sendNotification } from "../../utils/notifications.js";
 
@@ -73,7 +69,6 @@ export const deleteJob = asyncHandler(async (req, res, next) => {
     jobId.length !== 24 ||
     !mongoose.Types.ObjectId.isValid(jobId)
   ) {
-    console.log("Invalid jobId received:", jobId);
     return next(new Error("Invalid job ID", { cause: 400 }));
   }
 
@@ -93,23 +88,24 @@ export const deleteJob = asyncHandler(async (req, res, next) => {
 
   return job
     ? successResponse({ res, status: 200, data: { job } })
-    : next(new Error("Job not found or you are not Hr to update the job", { cause: 404 }));
+    : next(
+        new Error("Job not found or you are not Hr to update the job", {
+          cause: 404,
+        })
+      );
 });
 export const UpdateJobData = asyncHandler(async (req, res, next) => {
   const { jobId } = req.params;
   const { ...otherUpdates } = req.body;
 
-  // ✅ التحقق من صحة jobId
   if (
     !jobId ||
     jobId.length !== 24 ||
     !mongoose.Types.ObjectId.isValid(jobId)
   ) {
-    console.log("Invalid jobId received:", jobId);
     return next(new Error("Invalid job ID", { cause: 400 }));
   }
 
-  // ✅ منع تعديل بعض القيم الحساسة
   delete otherUpdates.addedByHR;
   delete otherUpdates.companyId;
 
@@ -138,7 +134,6 @@ export const getJobs = asyncHandler(async (req, res, next) => {
 
   const filter = {};
 
-  // البحث عن شركة بالاسم
   if (search) {
     const company = await dbservice.findOne({
       model: companyModel,
@@ -151,15 +146,13 @@ export const getJobs = asyncHandler(async (req, res, next) => {
     filter.companyId = company._id;
   }
 
-  // البحث باستخدام companyId أو jobId إذا تم تمريرهما في الـ params
   if (companyId) filter.companyId = companyId;
   if (jobId) filter._id = jobId;
 
-  // استخدام `paginate` لجلب البيانات مع التصفية والتقسيم إلى صفحات
   const { data: jobs, total } = await paginate({
     model: jobModel,
     filter,
-    select: "-__v", // استبعاد الفيلد `_v` من النتيجة
+    select: "-__v",
     page,
     limit,
   });
@@ -230,9 +223,6 @@ export const getJobApplications = asyncHandler(async (req, res, next) => {
   if (!company) return next(new Error("Company not found", { cause: 404 }));
 
   if (!hasPermission(req.user._id, company)) {
-    console.log(
-      `Unauthorized access attempt by user ${req.user._id} for job ${jobId}`
-    );
     return next(new Error("Unauthorized to view applications", { cause: 403 }));
   }
 
@@ -251,7 +241,6 @@ export const getJobApplications = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ✅ دالة مستقلة لفحص الصلاحيات
 const hasPermission = (userId, company) => {
   const isOwner =
     company.createdBy && userId.toString() === company.createdBy._id.toString();
@@ -263,105 +252,78 @@ const hasPermission = (userId, company) => {
 
 export const applyToJob = asyncHandler(async (req, res, next) => {
   // try {
-    const { jobId } = req.params;
-    const userId = req.user._id;
+  const { jobId } = req.params;
+  const userId = req.user._id;
 
-    if (req.user.role !== "User") {
-      return next(new Error("Only users can apply for jobs", { cause: 403 }));
-    }
+  if (req.user.role !== "User") {
+    return next(new Error("Only users can apply for jobs", { cause: 403 }));
+  }
 
-    const job = await dbservice.findOne({
-      model: jobModel,
-      filter: { _id: jobId },
-      populate: [
-        { path: "companyId", populate: { path: "HRs", select: "_id" } },
-      ],
-    });
+  const job = await dbservice.findOne({
+    model: jobModel,
+    filter: { _id: jobId },
+    populate: [{ path: "companyId", populate: { path: "HRs", select: "_id" } }],
+  });
 
-    if (!job) return next(new Error("Job not found", { cause: 404 }));
-    if (job.closed)
-      return next(
-        new Error("This job is no longer accepting applications", {
-          cause: 400,
-        })
-      );
+  if (!job) return next(new Error("Job not found", { cause: 404 }));
+  if (job.closed)
+    return next(
+      new Error("This job is no longer accepting applications", {
+        cause: 400,
+      })
+    );
 
-    const existingApplication = await dbservice.findOne({
-      model: applicationModel,
-      filter: { jobId, userId },
-    });
+  const existingApplication = await dbservice.findOne({
+    model: applicationModel,
+    filter: { jobId, userId },
+  });
 
-    if (existingApplication) {
-      return next(
-        new Error("You have already applied for this job", { cause: 400 })
-      );
-    }
+  if (existingApplication) {
+    return next(
+      new Error("You have already applied for this job", { cause: 400 })
+    );
+  }
 
-    // ✅ تأكد من وجود ملف للرفع
-    if (!req.file) {
-      return next(new Error("No file uploaded", { cause: 400 }));
-    }
+  if (!req.file) {
+    return next(new Error("No file uploaded", { cause: 400 }));
+  }
 
-    console.log("Uploading file to Cloudinary:", req.file.path); // 🔍 تتبع الملف قبل الرفع
+  const uploadResult = await cloud.uploader.upload(req.file.path, {
+    resource_type: "auto",
+    folder: "job_applications",
+  });
 
-    // ✅ رفع الملف إلى Cloudinary
-    const uploadResult = await cloud.uploader.upload(req.file.path, {
-      resource_type: "auto",
-      folder: "job_applications",
-    });
-
-    console.log("Upload Result:", uploadResult); // 🔍 تتبع بيانات الرفع
-
-    // ✅ حفظ البيانات في قاعدة البيانات
-    const application = await dbservice.create({
-      model: applicationModel,
-      data: {
-        userId,
-        jobId,
-        userCV: {
-          public_id: uploadResult.public_id,
-          secure_url: uploadResult.secure_url,
-        },
-        status: "Pending",
+  const application = await dbservice.create({
+    model: applicationModel,
+    data: {
+      userId,
+      jobId,
+      userCV: {
+        public_id: uploadResult.public_id,
+        secure_url: uploadResult.secure_url,
       },
-    });
-    console.log("HRs List:", job.companyId.HRs);
-    console.log("HRs:", job.companyId?.HRs);
-    console.log("Company Data:", job.companyId);
-    
-    console.log("Application Created:", application); // 🔍 تتبع بيانات الطلب بعد الحفظ
+      status: "Pending",
+    },
+  });
 
-    // ✅ إرسال إشعار عبر الـ Socket.io لكل HR في الشركة
-    const io = req.app.get("io");
-    // ✅ إرسال إشعار لكل HR متصل فقط
-    job.companyId.HRs.forEach((hr) => {
-      if (hr && hr._id) {
-        sendNotification(hr._id.toString(), "📩 New job application received!");
-      }
-    });
-    
+  const io = req.app.get("io");
+  job.companyId.HRs.forEach((hr) => {
+    if (hr && hr._id) {
+      sendNotification(hr._id.toString(), "📩 New job application received!");
+    }
+  });
 
-    
-    
-
-    return successResponse({
-      res,
-      message: "Application submitted successfully",
-      data: application,
-    });
-  // } catch (error) {
-  //   console.error("🔥 ERROR:", error); // 🔍 طباعة الخطأ في الكونسول لمزيد من التفاصيل
-  //   return next(
-  //     new Error(`An error occurred: ${error.message}`, { cause: 500 })
-  //   );
-  // }
+  return successResponse({
+    res,
+    message: "Application submitted successfully",
+    data: application,
+  });
 });
 export const acceptOrRejectApplicant = asyncHandler(async (req, res, next) => {
   const { applicationId, companyId } = req.params;
   const { companyStatus, userId } = req.body;
-  const hrId = req.user._id; 
+  const hrId = req.user._id;
 
-  // تأكيد أن الشركة موجودة
   const company = await dbservice.findOne({
     model: companyModel,
     filter: { _id: companyId },
@@ -370,17 +332,16 @@ export const acceptOrRejectApplicant = asyncHandler(async (req, res, next) => {
     return next(new Error("Company not found", { cause: 404 }));
   }
 
-  // التحقق من أن المستخدم هو HR في الشركة
   if (!company.HRs.some((hr) => hr.equals(hrId))) {
-    return next(new Error("Only HRs can update application status", { cause: 403 }));
+    return next(
+      new Error("Only HRs can update application status", { cause: 403 })
+    );
   }
 
-  // التحقق من أن status صحيح
   const validStatuses = ["Accepted", "Rejected", "Viewed", "In Consideration"];
   if (!validStatuses.includes(companyStatus)) {
     return next(new Error("Invalid status value", { cause: 400 }));
   }
-  // البحث عن الطلب
   const application = await applicationModel
     .findById(applicationId)
     .populate({ path: "userId", select: "email firstName lastName" });
@@ -389,18 +350,21 @@ export const acceptOrRejectApplicant = asyncHandler(async (req, res, next) => {
     return next(new Error("Application not found", { cause: 404 }));
   }
 
-  // تحديث حالة الطلب
   application.status = companyStatus;
   await application.save();
 
-  // توليد نص الإيميل
   const emailSubject = () => {
     switch (companyStatus) {
-      case "Accepted": return "Job Application Accepted";
-      case "Rejected": return "Job Application Rejected";
-      case "Viewed": return "Job Application Viewed";
-      case "In Consideration": return "Job Application In Consideration";
-      default: return "Job Application Pending";
+      case "Accepted":
+        return "Job Application Accepted";
+      case "Rejected":
+        return "Job Application Rejected";
+      case "Viewed":
+        return "Job Application Viewed";
+      case "In Consideration":
+        return "Job Application In Consideration";
+      default:
+        return "Job Application Pending";
     }
   };
 
@@ -419,19 +383,10 @@ export const acceptOrRejectApplicant = asyncHandler(async (req, res, next) => {
     }
   };
 
-  // طباعة معلومات التصحيح
-  console.log({
-    to: application.userId.email,
-    subject: emailSubject(),
-    body: emailBody(),
-  });
-
-  // تأكيد وجود الإيميل قبل الإرسال
   if (!application.userId.email) {
     return next(new Error("Applicant email not found", { cause: 400 }));
   }
 
-  // إرسال الإيميل
   await sendEmail({
     to: application.userId.email,
     subject: emailSubject(),
@@ -440,4 +395,3 @@ export const acceptOrRejectApplicant = asyncHandler(async (req, res, next) => {
 
   res.json({ message: `Application ${companyStatus} successfully` });
 });
-

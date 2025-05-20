@@ -8,32 +8,31 @@ import {
   generateEncryption,
 } from "../../../utils/security/encryption.js";
 import { compareHash, generateHash } from "../../../utils/security/hash.js";
-import bcrypt from "bcrypt";
 
-// جلب بيانات الحساب مع إرجاع الرقم غير المشفر
-export const GetProfileDataForAnotherUser = asyncHandler(async (req, res, next) => {
-  const {searchForUser} =req.params
-  const user = await dbService.findOne({
-    model: userModel,
-    filter: { _id: searchForUser },
-    select: "firstName lastName mobileNumber profilePic coverPic",
-  });
+export const GetProfileDataForAnotherUser = asyncHandler(
+  async (req, res, next) => {
+    const { searchForUser } = req.params;
+    const user = await dbService.findOne({
+      model: userModel,
+      filter: { _id: searchForUser },
+      select: "firstName lastName mobileNumber profilePic coverPic",
+    });
 
-  if (!user) return next(new Error("User not found", { cause: 404 }));
-  const userData = {
-    ...user.toObject(),
-    mobileNumber: decodeEncryption({ cipherText: user.mobileNumber }), // فك التشفير
-  };
+    if (!user) return next(new Error("User not found", { cause: 404 }));
+    const userData = {
+      ...user.toObject(),
+      mobileNumber: decodeEncryption({ cipherText: user.mobileNumber }),
+    };
 
-  return successResponse({
-    res,
-    data: {
-      userName: userData.firstName + " " + userData.lastName,
-      mobileNumber: userData.mobileNumber,
-    },
-  });
-});
-// جلب بيانات مستخدم آخر مع إظهار الرقم الحقيقي
+    return successResponse({
+      res,
+      data: {
+        userName: userData.firstName + " " + userData.lastName,
+        mobileNumber: userData.mobileNumber,
+      },
+    });
+  }
+);
 export const GetLoginUserAccountData = asyncHandler(async (req, res, next) => {
   if (!req.user) {
     return next(new Error("User not authenticated", { cause: 401 }));
@@ -45,22 +44,21 @@ export const GetLoginUserAccountData = asyncHandler(async (req, res, next) => {
   });
   if (!user) return next(new Error("User not found", { cause: 404 }));
 
-    const userData = {
-      ...user.toObject(),
-      mobileNumber: decodeEncryption({ cipherText: user.mobileNumber }), // فك التشفير
-    };
+  const userData = {
+    ...user.toObject(),
+    mobileNumber: decodeEncryption({ cipherText: user.mobileNumber }),
+  };
   return userData
-    ? successResponse({ res, data: { userData  } })
+    ? successResponse({ res, data: { userData } })
     : next(new Error("In-valid account", { cause: 404 }));
 });
 
-// تحديث بيانات المستخدم مع تشفير رقم الهاتف الجديد
 export const updateUserAccount = asyncHandler(async (req, res, next) => {
   const { mobileNumber, ...otherUpdates } = req.body;
   let updateData = { ...otherUpdates };
 
   if (mobileNumber) {
-    updateData.mobileNumber = generateEncryption({ plainText: mobileNumber }); // تشفير الرقم الجديد
+    updateData.mobileNumber = generateEncryption({ plainText: mobileNumber });
   }
 
   const user = await dbService.findOneAndUpdate({
@@ -92,7 +90,6 @@ export const updatepassword = asyncHandler(async (req, res, next) => {
   return successResponse({ res, data: { user } });
 });
 
-// رفع صورة البروفايل
 export const updateProfilePic = asyncHandler(async (req, res, next) => {
   if (!req.file) return next(new Error("No file uploaded", { cause: 400 }));
 
@@ -110,7 +107,6 @@ export const updateProfilePic = asyncHandler(async (req, res, next) => {
   return successResponse({ res, data: { user } });
 });
 
-// رفع صورة الغلاف
 export const updateCoverPic = asyncHandler(async (req, res, next) => {
   if (!req.file) return next(new Error("No file uploaded", { cause: 400 }));
 
@@ -128,7 +124,6 @@ export const updateCoverPic = asyncHandler(async (req, res, next) => {
   return successResponse({ res, data: { user } });
 });
 
-// حذف صورة البروفايل
 export const deleteProfilePic = asyncHandler(async (req, res, next) => {
   const user = await dbService.findOne({
     model: userModel,
@@ -153,7 +148,6 @@ export const deleteProfilePic = asyncHandler(async (req, res, next) => {
   });
 });
 
-// حذف صورة الغلاف
 export const deleteCoverPic = asyncHandler(async (req, res, next) => {
   const user = await dbService.findOne({
     model: userModel,
@@ -178,9 +172,7 @@ export const deleteCoverPic = asyncHandler(async (req, res, next) => {
   });
 });
 
-// حذف الحساب بطريقة Soft Delete
 export const softDeleteAccount = asyncHandler(async (req, res, next) => {
-
   const user = await dbService.findOneAndUpdate({
     model: userModel,
     filter: { _id: req.user._id },
@@ -189,41 +181,6 @@ export const softDeleteAccount = asyncHandler(async (req, res, next) => {
   });
   if (user.deletedAt) {
     return next(new Error("Account is Deleted", { cause: 404 }));
-    
   }
   return successResponse({ res, message: "Account deleted successfully" });
 });
-
-// export const unban = asyncHandler(async (req, res, next) => {
-//   const { baned } = req.body;
-
-//   if (req.user.role !== "Admin") {
-//     return next(new Error("You're not authorized to unban users", { cause: 403 }));
-//   }
-
-//   // البحث عن المستخدم قبل التحديث
-//   const userbaned = await dbService.findOne({
-//     model: userModel,
-//     filter: { _id: baned },
-//   });
-
-//   if (!userbaned) {
-//     return next(new Error("User not found", { cause: 404 }));
-//   }
-
-//   if (userbaned.deletedAt === null) {
-//     return next(new Error("User is already unbanned", { cause: 400 }));
-//   }
-
-//   // تحديث المستخدم لإلغاء الحظر
-//   const updatedUser = await dbService.findOneAndUpdate({
-//     model: userModel,
-//     filter: { _id: baned },
-//     data: { deletedAt: null },
-//     options: { new: true },
-//   });
-
-//   return successResponse({ res, message: "Account unbanned successfully" });
-// });
-
-

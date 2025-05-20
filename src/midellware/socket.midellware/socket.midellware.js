@@ -21,7 +21,6 @@ export const checkHRorOwner = () => {
       model:companyModel,
       filter:{_id:companyId}
     })
-    // if (req.user.role !== "HR" && req.user.role !== "Owner")
     if (
       req.user._id.toString() !== whoCanStartConversation.createdBy.toString() &&
       !whoCanStartConversation.HRs.includes(req.user._id.toString())

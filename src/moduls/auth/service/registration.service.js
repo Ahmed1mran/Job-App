@@ -1,4 +1,6 @@
-import userModel, { providerTypes } from "../../../DB/models/User.Collection.js";
+import userModel, {
+  providerTypes,
+} from "../../../DB/models/User.Collection.js";
 import * as dbservice from "../../../DB/db.service.js";
 import { asyncHandler } from "../../../utils/error/error.js";
 import { emailEvent } from "../../../utils/events/email.event.js";
@@ -6,14 +8,7 @@ import { successResponse } from "../../../utils/response/success.response.js";
 import { compareHash } from "../../../utils/security/hash.js";
 
 export const signup = asyncHandler(async (req, res, next) => {
-  const {
-    userName,
-    email,
-    password,
-    mobileNumber,
-    gender,
-    DOB,
-  } = req.body;
+  const { userName, email, password, mobileNumber, gender, DOB } = req.body;
 
   if (await dbservice.findOne({ model: userModel, filter: { email } })) {
     return next(new Error("Email already exists", { cause: 400 }));
@@ -24,8 +19,8 @@ export const signup = asyncHandler(async (req, res, next) => {
     data: {
       userName,
       email,
-      password, // سيتم تشفيرها تلقائيًا في الـ pre-save hook
-      mobileNumber, // سيتم تشفيره تلقائيًا في الـ pre-save hook
+      password,
+      mobileNumber,
       gender,
       DOB,
       provider: providerTypes.system,
@@ -33,8 +28,12 @@ export const signup = asyncHandler(async (req, res, next) => {
   });
 
   emailEvent.emit("sendConfirmEmailWithOTP", { id: user._id, email });
-  // console.log(user);
-  return successResponse({ res, message: "Done, please check your Email", status: 201, data: { user } });
+  return successResponse({
+    res,
+    message: "Done, please check your Email",
+    status: 201,
+    data: { user },
+  });
 });
 
 export const confirmEmail = asyncHandler(async (req, res, next) => {
@@ -50,7 +49,9 @@ export const confirmEmail = asyncHandler(async (req, res, next) => {
   }
 
   const otpEntry = user.otp.find(
-    (otp) => compareHash({plainText:code, hashValue:otp.code}) && otp.type === "confirmEmail"
+    (otp) =>
+      compareHash({ plainText: code, hashValue: otp.code }) &&
+      otp.type === "confirmEmail"
   );
 
   if (!otpEntry) {

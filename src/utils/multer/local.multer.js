@@ -2,18 +2,15 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-// الأنواع المسموحة للملفات
 export const fileValidations = {
   image: ["image/jpeg", "image/png", "image/gif", "image/webp"],
   document: ["application/pdf", "application/msword", "text/plain"],
 };
 
-// دالة تجهيز Multer لحفظ الملفات محليًا
 export const uploadFileDisk = (customPath = "general", fileValidation = []) => {
   const basePath = path.join("uploads", customPath);
   const fullPath = path.resolve("./src", basePath);
 
-  // إنشاء المجلد لو لم يكن موجودًا
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true });
   }

@@ -19,23 +19,28 @@ export const addCompany = joi
 export const SoftDeleteCompany = joi
   .object()
   .keys({
-
-    companyId:generalFields.companyId
+    companyId: generalFields.companyId,
   })
   .required();
-export const AddHRS = joi .object() .keys({
-    id:generalFields.id.required(),
-    companyName:generalFields.companyName.required()
-  }).required();
-export const SearchForCompanyByName = joi .object() .keys({
+export const AddHRS = joi
+  .object()
+  .keys({
+    id: generalFields.id.required(),
+    companyName: generalFields.companyName.required(),
+  })
+  .required();
+export const SearchForCompanyByName = joi
+  .object()
+  .keys({
+    companyName: generalFields.companyName.required(),
+  })
+  .required();
+export const logo = joi
+  .object()
+  .keys({
+    companyId: generalFields.companyId.required(),
 
-    companyName:generalFields.companyName.required()
-  }).required();
-  export const logo = joi.object().keys({
-
-    companyId:generalFields.companyId.required(),
-
-    file:generalFields.file.required()
-  
-  }).required()
-  export const coverPic = logo
+    file: generalFields.file.required(),
+  })
+  .required();
+export const coverPic = logo;

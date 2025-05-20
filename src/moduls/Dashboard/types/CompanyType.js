@@ -1,4 +1,9 @@
-import { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLBoolean } from "graphql";
+import {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLID,
+  GraphQLBoolean,
+} from "graphql";
 
 const CompanyType = new GraphQLObjectType({
   name: "Company",

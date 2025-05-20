@@ -20,12 +20,7 @@ router.patch(
   validation(validators.UpdateJobData),
   jobService.UpdateJobData
 );
-router.delete(
-  "/deleteJob/:jobId",
-  authentication(),
-  // validation(validators.UpdateJobData),
-  jobService.deleteJob
-);
+router.delete("/deleteJob/:jobId", authentication(), jobService.deleteJob);
 
 router.get("/getJobs/:jobId?", jobService.getJobs);
 router.get("/companies/:companyId/jobs/:jobId?", jobService.getJobs);

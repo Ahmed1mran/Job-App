@@ -1,8 +1,9 @@
 import joi from "joi";
 import { generalFields } from "../../midellware/validation.midellware.js";
 
-export const UpdateJobData = joi.object().keys({
-
+export const UpdateJobData = joi
+  .object()
+  .keys({
     jobTitle: generalFields.jobTitle,
     jobLocation: generalFields.jobLocation,
     workingTime: generalFields.workingTime,
@@ -10,10 +11,12 @@ export const UpdateJobData = joi.object().keys({
     jobDescription: generalFields.jobDescription,
     technicalSkills: generalFields.technicalSkills,
     softSkills: generalFields.softSkills,
-    jobId: generalFields.jobId.required()
-  }).required();
-export const addJob = joi.object().keys({
-
+    jobId: generalFields.jobId.required(),
+  })
+  .required();
+export const addJob = joi
+  .object()
+  .keys({
     jobTitle: generalFields.jobTitle.required(),
     jobLocation: generalFields.jobLocation.required(),
     workingTime: generalFields.workingTime.required(),
@@ -22,8 +25,8 @@ export const addJob = joi.object().keys({
     technicalSkills: generalFields.technicalSkills.required(),
     softSkills: generalFields.softSkills.required(),
     companyId: generalFields.companyId.required(),
-  }).required();
-
+  })
+  .required();
 
 export const SoftDeleteCompany = joi
   .object()
@@ -47,7 +50,6 @@ export const SearchForCompanyByName = joi
 export const logo = joi
   .object()
   .keys({
-
     companyId: generalFields.companyId.required(),
 
     file: generalFields.file.required(),

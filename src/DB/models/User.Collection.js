@@ -60,8 +60,7 @@ const userSchema = new Schema(
       },
     },
 
-    mobileNumber: { type: String, 
-     },
+    mobileNumber: { type: String },
 
     role: {
       type: String,
@@ -118,7 +117,6 @@ userSchema.pre("save", async function (next) {
   if (this.isModified("mobileNumber")) {
     this.mobileNumber = generateEncryption({ plainText: this.mobileNumber });
   }
-  console.log("Before Save:", this.firstName, this.lastName);
 
   next();
 });

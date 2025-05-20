@@ -81,7 +81,7 @@ export const AddHRS = asyncHandler(async (req, res, next) => {
     model: companyModel,
     filter: { companyName },
     data: {
-      $push:{HRs: id,}
+      $push: { HRs: id },
     },
   });
 
@@ -149,7 +149,6 @@ export const GetSpecificCompanyWithRelatedJobs = asyncHandler(
         deletedAt: null,
       },
     });
-    console.log(data);
     return successResponse({
       res,
       status: 200,

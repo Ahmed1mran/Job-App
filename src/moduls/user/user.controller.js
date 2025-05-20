@@ -8,11 +8,24 @@ import { endpoint } from "./user.endpoint.js";
 import { validation } from "../../midellware/validation.midellware.js";
 import { uploadCloudFile } from "../../utils/multer/cloud.multer.js";
 import * as validators from "./user.validation.js";
-import {fileValidations,uploadFileDisk,} from "../../utils/multer/local.multer.js";
+import {
+  fileValidations,
+  uploadFileDisk,
+} from "../../utils/multer/local.multer.js";
 const router = Router();
 
-router.get("/profile/anotherUser/:searchForUser", authentication(),validation(validators.profile), profileService.GetProfileDataForAnotherUser);
-router.get("/profile/getUserData/",validation(validators.getUserData),authentication(),profileService.GetLoginUserAccountData);
+router.get(
+  "/profile/anotherUser/:searchForUser",
+  authentication(),
+  validation(validators.profile),
+  profileService.GetProfileDataForAnotherUser
+);
+router.get(
+  "/profile/getUserData/",
+  validation(validators.getUserData),
+  authentication(),
+  profileService.GetLoginUserAccountData
+);
 
 router.patch(
   "/profile/updatePassword",
@@ -48,14 +61,12 @@ router.delete(
   authorization(endpoint.profile),
   profileService.softDeleteAccount
 );
-// router.patch(
-//   "/unban",
-//   authentication(),
-//   authorization(endpoint.profile),
-//   profileService.unban
-// );
-router.delete( "/profile/deleteProfilePic", authentication(), profileService.deleteProfilePic);
-router.delete( "/cover/pic", authentication(), profileService.deleteCoverPic);
 
+router.delete(
+  "/profile/deleteProfilePic",
+  authentication(),
+  profileService.deleteProfilePic
+);
+router.delete("/cover/pic", authentication(), profileService.deleteCoverPic);
 
 export default router;

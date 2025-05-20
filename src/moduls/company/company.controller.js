@@ -3,9 +3,7 @@ import * as companyService from "./company.service.js";
 import * as validators from "./company.validation.js";
 import { validation } from "../../midellware/validation.midellware.js";
 import { authentication } from "../../midellware/auth.midellware.js";
-import {
-  fileValidations,
-} from "../../utils/response/multer/local.multer.js";
+import { fileValidations } from "../../utils/response/multer/local.multer.js";
 import { uploadCloudFile } from "../../utils/multer/cloud.multer.js";
 const router = Router();
 

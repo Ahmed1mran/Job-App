@@ -12,8 +12,7 @@ bootstrap(app, express);
 
 app.get("/", (req, res) => res.send("Hello World!"));
 const server = app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-  
-  // ✅ تهيئة الـ Socket.io وربطه بالسيرفر
-  const io = initSocket(server);
+  console.log(`Server running on port ${port}`);
+});
+
+const io = initSocket(server);

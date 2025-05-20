@@ -34,7 +34,7 @@ const companySchema = new Schema(
 
 companySchema.index({ companyName: 1 }, { unique: true });
 companySchema.index({ companyEmail: 1 }, { unique: true });
-// حذف جميع الطلبات المرتبطة بالشركة تلقائيًا عند حذفها
+
 companySchema.pre("findOneAndDelete", async function (next) {
   const company = await this.model.findOne(this.getFilter());
   if (company) {

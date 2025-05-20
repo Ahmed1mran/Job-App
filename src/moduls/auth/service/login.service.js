@@ -79,9 +79,6 @@ export const loginWithGmail = asyncHandler(async (req, res, next) => {
       },
     });
   }
-  console.log("User Provider:", user.provider);
-  console.log("Expected Provider:", providerTypes.google);
-
   if (user.provider !== providerTypes.google) {
     return next(new Error("In-valid provider", { cause: 400 }));
   }
@@ -102,7 +99,6 @@ export const loginWithGmail = asyncHandler(async (req, res, next) => {
     res,
     message: "Login successful",
     data: {
-      // payload,
       Token: { accessToken, refreshToken },
     },
   });
@@ -114,8 +110,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     model: userModel,
     filter: { email, deletedAt: null },
   });
-  console.log(user);
-  console.log(user.isConfirmed);
+
   if (!user || !user.isConfirmed) {
     return next(
       new Error("Invalid account or unverified email", { cause: 404 })
@@ -144,7 +139,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
     data: {
       password: generateHash({ plainText: password }),
       changeCredentialTime: Date.now(),
-      $unset: { otp:0 },
+      $unset: { otp: 0 },
     },
   });
 

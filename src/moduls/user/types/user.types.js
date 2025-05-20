@@ -82,9 +82,8 @@ export const oneUserResponse = new GraphQLObjectType({
 export const getProfileResponse = new GraphQLObjectType({
   name: "getProfileResponse",
   fields: {
-    message:{type:GraphQLString},
-    statusCode:{type:GraphQLInt},
-    data:{type:oneUserResponse},
-
+    message: { type: GraphQLString },
+    statusCode: { type: GraphQLInt },
+    data: { type: oneUserResponse },
   },
 });

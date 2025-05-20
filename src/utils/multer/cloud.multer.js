@@ -4,7 +4,7 @@ export const fileValidations = {
   document: ["application/pdf", "application/msword", "application/txt"],
 };
 export const uploadCloudFile = (fileValidation = []) => {
-  const storage = multer.diskStorage({  });
+  const storage = multer.diskStorage({});
 
   function fileFilter(req, file, cb) {
     if (fileValidation.includes(file.mimetype)) {

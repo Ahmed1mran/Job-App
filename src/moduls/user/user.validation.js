@@ -7,7 +7,6 @@ export const profileImage = joi.object().keys({
 
 }).required()
 export const getUserData = joi.object().keys({
-  // userId: generalFields.id.required(),
 });
 export const profile = joi.object().keys({
   searchForUser:joi.string()

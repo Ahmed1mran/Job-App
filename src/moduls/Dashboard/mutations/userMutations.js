@@ -12,11 +12,13 @@ export const banUser = {
     }
     if (user.bannedAt) {
       throw new Error("user already banned");
-      
     }
-    return await userModel.findByIdAndUpdate(userId, { bannedAt: new Date().toISOString() }, { new: true });
-
-  }
+    return await userModel.findByIdAndUpdate(
+      userId,
+      { bannedAt: new Date().toISOString() },
+      { new: true }
+    );
+  },
 };
 
 export const unbanUser = {
@@ -29,8 +31,11 @@ export const unbanUser = {
     }
     if (!user.bannedAt) {
       throw new Error("user already not banned");
-      
     }
-    return await userModel.findByIdAndUpdate(userId, { bannedAt: null }, { new: true });
+    return await userModel.findByIdAndUpdate(
+      userId,
+      { bannedAt: null },
+      { new: true }
+    );
   },
 };

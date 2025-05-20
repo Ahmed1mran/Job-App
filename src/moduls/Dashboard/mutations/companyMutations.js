@@ -13,6 +13,10 @@ export const approveCompany = {
     if (!company) {
       throw new Error("Company not found");
     }
-    return await companyModel.findByIdAndUpdate(companyId, { approvedByAdmin: true }, { new: true });
+    return await companyModel.findByIdAndUpdate(
+      companyId,
+      { approvedByAdmin: true },
+      { new: true }
+    );
   }),
 };

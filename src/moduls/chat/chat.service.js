@@ -1,5 +1,3 @@
-
-
 import chatModel from "../../DB/models/Chat.Collection.js";
 import { asyncHandler } from "../../utils/error/error.js";
 import * as dbservice from "../../DB/db.service.js";
@@ -23,41 +21,10 @@ export const getChatHistory = asyncHandler(async (req, res, next) => {
   }
 
   res.json({
-    // message: "Chat history retrieved successfully",
     chat,
   });
 });
-// export const startconversation = asyncHandler(async (req, res, next) => {
-//   const { userId } = req.params;
-//   const currentUserId = req.user._id;
 
-//   let chat = await chatModel.findOne({
-//     $or: [
-//       { senderId: currentUserId, receiverId: userId },
-//       { senderId: userId, receiverId: currentUserId },
-//     ],
-//   }).populate("messages")
-//   console.log("Found chat:", chat);
-
-//   if (!chat) {
-//     chat = await chatModel.create({ senderId: currentUserId, receiverId: userId, messages: [] });
-//   }
-//   console.log("Checking existing chat between:", currentUserId, "and", userId);
-
-// // بعد إنشاء المحادثة الجديدة
-// const receiverSocketId = onlineUsers.get(userId);
-// if (receiverSocketId) {
-//   io.to(receiverSocketId).emit("chat_started", chat);
-// }
-// await chat.save()
-
-//   res.json({
-//     message: "Chat started successfully",
-//     chat,
-//   });
-// });
-
-// مثال REST endpoint لإرسال رسالة في chat.service.js
 export const sendMessageRest = asyncHandler(async (req, res, next) => {
   const { chatId, senderId, message } = req.body;
   const chat = await chatModel.findById(chatId);

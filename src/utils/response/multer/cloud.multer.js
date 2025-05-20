@@ -1,9 +1,9 @@
 import multer from "multer";
- const fileValidations = {
+const fileValidations = {
   image: ["image/jpeg", "image/png", "image/gif"],
   document: ["application/pdf", "application/msword", "application/txt"],
 };
-export const uploadCloudFile = ( fileValidation = []) => {
+export const uploadCloudFile = (fileValidation = []) => {
   const storage = multer.diskStorage({});
 
   function fileFilter(req, file, cb) {
@@ -11,7 +11,7 @@ export const uploadCloudFile = ( fileValidation = []) => {
       cb(null, true);
     } else {
       cb("In-Valid file formate", false);
-     }
+    }
   }
 
   return multer({ fileFilter, storage });

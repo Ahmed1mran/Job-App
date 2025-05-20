@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 export const sendEmail = async ({
   to = [],
   cc = [],
-  bcc =[],
+  bcc = [],
   subject = "Send Email Defult",
   text = "",
   html = "",
